@@ -1,0 +1,150 @@
+import React, { useMemo } from "react";
+import {
+  Rounder,
+  TCoord,
+  findIntersectionPoint,
+  getLineLength,
+  toRad,
+  xy,
+} from "../utils/math";
+
+interface props {
+  sides: number;
+  size: number;
+  foldRadiusRange: number /** 0 to 1 */;
+  rounding: {
+    petal: number;
+    fold: number;
+  };
+  elongation: number /** 1 to 3 */;
+}
+
+const PETAL_RADIUS_RANGE = 0.9;
+
+const Polyflower: React.FC<props> = ({
+  sides,
+  size,
+  foldRadiusRange,
+  rounding,
+  elongation,
+}) => {
+  const angleDelta = 360 / sides;
+  const petalRadius = size * PETAL_RADIUS_RANGE;
+
+  const maxFoldRadius = Math.cos(toRad(angleDelta / 2)) * petalRadius;
+  const foldRadius = foldRadiusRange * maxFoldRadius;
+
+  const origin: TCoord = [size, size];
+
+  // always point upwards
+  let rotationOffset = 0;
+  switch (sides % 4) {
+    case 1:
+      rotationOffset = -angleDelta / 4;
+      break;
+    case 2:
+      rotationOffset = -angleDelta / 2;
+      break;
+    case 3:
+      rotationOffset = -angleDelta / 1.33;
+      break;
+  }
+
+  const angles = useMemo(
+    () =>
+      [...Array(sides)].map((_, idx) => {
+        const petalAngle = idx * angleDelta + rotationOffset;
+        const foldAngle = petalAngle + angleDelta / 2;
+        return [petalAngle, foldAngle];
+      }),
+    // will change only when sides change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sides]
+  );
+
+  const corners = angles.map(([petalAngle, foldAngle]) => {
+    const vertCorner = findIntersectionPoint(petalAngle, petalRadius, origin);
+    const foldCorner = findIntersectionPoint(foldAngle, foldRadius, origin);
+    return [vertCorner, foldCorner];
+  });
+
+  const petals = corners.map(([vertCorner, foldCorner], idx, arr) => {
+    // return [vertCorner, foldCorner].map(xy).join("L");
+    const prevIdx = idx - 1 < 0 ? arr.length - 1 : idx - 1;
+    const prevFoldCorner = arr[prevIdx][1];
+    const r = new Rounder([prevFoldCorner, vertCorner, foldCorner]);
+    const roundRadius = rounding.petal;
+    const path = r.getRoundedPath(roundRadius, elongation);
+    return { ...path, roundRadius };
+  });
+
+  const folds = petals.map(({ pathCoordinates }, idx, arr) => {
+    const nextIdx = (idx + 1) % arr.length;
+    const p1 = pathCoordinates.at(-2)!;
+    const p2 = corners[idx][1];
+    const p3 = petals[nextIdx].pathCoordinates.at(1)!;
+    const doesGetCollapsed = getLineLength(p1, p3) < 2;
+    const r = new Rounder([p1, p2, p3]);
+    const roundRadius = doesGetCollapsed ? 0 : rounding.fold;
+    const path = r.getRoundedPath(roundRadius, elongation);
+    return { ...path, roundRadius };
+  });
+
+  const finalPath = petals.map((p, idx, arr) => {
+    const prevIdx = idx - 1 < 0 ? arr.length - 1 : idx - 1;
+    const nextIdx = (idx + 1) % arr.length;
+
+    const { pathCoordinates: petalPathCoords, roundRadius: petalR } = p;
+    const { pathCoordinates: foldPathCoords, roundRadius: foldR } = folds[idx];
+
+    const hasSharpPetals = petalR === 0;
+    const hasSharpFolds = foldR === 0;
+
+    if (!hasSharpFolds && !hasSharpPetals) {
+      // both paths have rounding
+      const [pt0, ph0, ph1, pt1] = petalPathCoords.slice(1, -1);
+      const petalPath = xy(pt0) + "C" + xy(ph0) + "," + xy(ph1) + "," + xy(pt1);
+      const [ft0, fh0, fh1, ft1] = foldPathCoords.slice(1, -1);
+      const foldPath = xy(ft0) + "C" + xy(fh0) + "," + xy(fh1) + "," + xy(ft1);
+      return petalPath + "L" + foldPath;
+    }
+
+    if (hasSharpFolds && hasSharpPetals) {
+      // both path roundings is zero
+      return petalPathCoords.map(xy).join("L");
+    }
+
+    if (hasSharpFolds && !hasSharpPetals) {
+      const [pt0, ph0, ph1, pt1] = petalPathCoords.slice(1, -1);
+      const a = corners[prevIdx][1];
+      const b = corners[idx][1];
+
+      const curvePath = `${xy(pt0)} C ${xy(ph0)}, ${xy(ph1)}, ${xy(pt1)}`;
+      return `${xy(a)} L ${curvePath} L ${xy(b)}`;
+    }
+
+    if (hasSharpPetals && !hasSharpFolds) {
+      const [ft0, fh0, fh1, ft1] = foldPathCoords.slice(1, -1);
+      const a = corners[idx][0];
+      const b = corners[nextIdx][0];
+
+      const curvePath = `${xy(ft0)} C ${xy(fh0)}, ${xy(fh1)}, ${xy(ft1)}`;
+      return `${xy(a)} L ${curvePath} L ${xy(b)}`;
+    }
+
+    console.error("this should never get logged");
+  });
+
+  return (
+    <svg width={size * 2} height={size * 2} fill="transparent">
+      <path
+        d={`M ${finalPath.join("L")} Z`}
+        strokeWidth={2}
+        stroke="white"
+        fill="transparent"
+      />
+    </svg>
+  );
+};
+
+export default Polyflower;
