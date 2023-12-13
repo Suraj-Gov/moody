@@ -8,7 +8,7 @@ const lerp = (a: number, b: number, delta: number) => {
 
 const d = (from: number, to: number, currVal: number) => {
   const fullRange = from - to;
-  const delta = currVal / fullRange;
+  const delta = (currVal - from) / fullRange;
   return Math.abs(delta);
 };
 
@@ -36,7 +36,8 @@ function App() {
 
     const isShitty = moodQ >= -150 && moodQ < -10;
     if (isShitty) {
-      const delta = d(-150, -10, moodQ);
+      const delta = d(-10, -150, moodQ);
+      console.log(delta);
       config.petalRadiusRange = lerp(0.79, 0.9, delta);
       config.foldRadiusRange = lerp(1, 0.6, delta);
       config.sides = 8;
@@ -66,8 +67,13 @@ function App() {
     const isHeavenly = moodQ >= 10 && moodQ <= 150;
     if (isHeavenly) {
       const delta = d(10, 150, moodQ);
-      config.petalRadiusRange = lerp(0.9, 1.6, delta);
-      config.elongation = lerp(1.3, 2, delta);
+      if (moodQ >= 10 && moodQ <= 30) {
+        config.petalRadiusRange = 0.9;
+      } else {
+        const delta2 = d(30, 150, moodQ);
+        config.petalRadiusRange = lerp(0.9, 1.55, delta2);
+      }
+      config.elongation = lerp(1.3, 2.5, delta);
       config.foldRadiusRange = lerp(1, 0.45, delta);
       config.sides = 5;
       config.rounding.petal = lerp(100, 50, delta);
