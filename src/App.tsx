@@ -9,8 +9,7 @@ const lerp = (a: number, b: number, delta: number) => {
 const d = (from: number, to: number, currVal: number) => {
   const fullRange = from - to;
   const delta = currVal / fullRange;
-  if (delta < 0) return 1 - delta;
-  return delta;
+  return Math.abs(delta);
 };
 
 function App() {
@@ -52,15 +51,27 @@ function App() {
       }
       return config;
     }
+
     const isOk = moodQ >= -10 && moodQ < 10;
     if (isOk) {
-      const delta = d(-10, 10, moodQ);
       config.petalRadiusRange = 0.9;
-      config.elongation = lerp(1.3, 1.3, delta);
-      config.foldRadiusRange = lerp(1, 0.9, delta);
+      config.elongation = 1.3;
+      config.foldRadiusRange = 1;
       config.sides = 5;
-      config.rounding.petal = lerp(100, 30, delta);
-      config.rounding.fold = lerp(0, 30, delta);
+      config.rounding.petal = 100;
+      config.rounding.fold = 10;
+      return config;
+    }
+
+    const isHeavenly = moodQ >= 10 && moodQ <= 150;
+    if (isHeavenly) {
+      const delta = d(10, 150, moodQ);
+      config.petalRadiusRange = lerp(0.9, 1.6, delta);
+      config.elongation = lerp(1.3, 2, delta);
+      config.foldRadiusRange = lerp(1, 0.45, delta);
+      config.sides = 5;
+      config.rounding.petal = lerp(100, 50, delta);
+      config.rounding.fold = lerp(10, 0, delta);
       return config;
     }
 
@@ -80,7 +91,7 @@ function App() {
               type="range"
               value={moodQ}
               min={-150}
-              max={0}
+              max={150}
               onChange={handleMoodChange}
             />
             <pre>heavenly</pre>
