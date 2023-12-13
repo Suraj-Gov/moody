@@ -17,11 +17,11 @@ interface props {
     fold: number;
   };
   elongation: number /** 1 to 3 */;
+  petalRadiusRange: number /** 0 to 1 */;
 }
 
-const PETAL_RADIUS_RANGE = 0.9;
-
 const Polyflower: React.FC<props> = ({
+  petalRadiusRange,
   sides,
   size,
   foldRadiusRange,
@@ -29,7 +29,7 @@ const Polyflower: React.FC<props> = ({
   elongation,
 }) => {
   const angleDelta = 360 / sides;
-  const petalRadius = size * PETAL_RADIUS_RANGE;
+  const petalRadius = size * petalRadiusRange;
 
   const maxFoldRadius = Math.cos(toRad(angleDelta / 2)) * petalRadius;
   const foldRadius = foldRadiusRange * maxFoldRadius;
@@ -140,7 +140,7 @@ const Polyflower: React.FC<props> = ({
       <path
         d={`M ${finalPath.join("L")} Z`}
         strokeWidth={2}
-        stroke="white"
+        stroke="black"
         fill="transparent"
       />
     </svg>
