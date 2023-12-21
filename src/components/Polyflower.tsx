@@ -18,6 +18,7 @@ interface props {
   };
   elongation: number /** 1 to 3 */;
   petalRadiusRange: number /** 0 to 1 */;
+  className?: React.SVGAttributes<SVGSVGElement>["className"];
 }
 
 const Polyflower: React.FC<props> = ({
@@ -27,6 +28,7 @@ const Polyflower: React.FC<props> = ({
   foldRadiusRange,
   rounding,
   elongation,
+  className,
 }) => {
   const angleDelta = 360 / sides;
   const petalRadius = size * petalRadiusRange;
@@ -136,12 +138,17 @@ const Polyflower: React.FC<props> = ({
   });
 
   return (
-    <svg width={size * 2} height={size * 2} fill="transparent">
+    <svg
+      className={className}
+      width={size * 2}
+      height={size * 2}
+      fill="transparent"
+    >
       <path
         d={`M ${finalPath.join("L")} Z`}
         strokeWidth={2}
         stroke="black"
-        fill="transparent"
+        fill="red"
       />
     </svg>
   );
