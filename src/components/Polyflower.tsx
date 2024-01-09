@@ -16,7 +16,10 @@ interface props {
     petal: number;
     fold: number;
   };
-  elongation: number /** 1 to 3 */;
+  elongation: {
+    petal: number;
+    fold: number;
+  };
   petalRadiusRange: number /** 0 to 1 */;
   className?: React.SVGAttributes<SVGSVGElement>["className"];
 }
@@ -76,7 +79,7 @@ const Polyflower: React.FC<props> = ({
     const prevFoldCorner = arr[prevIdx][1];
     const r = new Rounder([prevFoldCorner, vertCorner, foldCorner]);
     const roundRadius = rounding.petal;
-    const path = r.getRoundedPath(roundRadius, elongation);
+    const path = r.getRoundedPath(roundRadius, elongation.petal);
     return { ...path, roundRadius };
   });
 
@@ -88,7 +91,7 @@ const Polyflower: React.FC<props> = ({
     const doesGetCollapsed = getLineLength(p1, p3) < 2;
     const r = new Rounder([p1, p2, p3]);
     const roundRadius = doesGetCollapsed ? 0 : rounding.fold;
-    const path = r.getRoundedPath(roundRadius, elongation);
+    const path = r.getRoundedPath(roundRadius, elongation.fold);
     return { ...path, roundRadius };
   });
 
