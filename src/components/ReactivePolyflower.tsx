@@ -90,13 +90,13 @@ const getReactiveConfig = (props: props) => {
   if (isHeavenly) {
     const d = toRange(max * 0.07, max, curr);
     config.sides = 5;
-    config.rounding.petal = lerp(d, size, 40, 80);
-    config.elongation.petal = lerp(d, 1.4, 1.3, 1.5);
-    config.rounding.fold = lerp(d, size * 0.1, 10, 5, 0);
-    config.elongation.fold = lerp(d, 2.5, 1.4);
-    config.foldRadiusRange = lerp(d, 1, 0.6);
+    config.rounding.petal = size * lerp(d, 1, 0.2, 0.3);
+    config.elongation.petal = lerp(d, 1.4, 1.3, 1.3);
+    config.rounding.fold = size * lerp(d, 0.1, 0.05, 0.025, 0);
+    config.elongation.fold = lerp(d, 2.5, 1);
+    config.foldRadiusRange = lerp(d, 1, 0.65);
     config.petalRadiusRange *= lerp(d, 1, 0.9, 0.7);
-    config.size *= lerp(d, 1, 1.1, 1.15, 1.4, 1.8);
+    config.size *= lerp(d, 1, 1.1, 1.15, 1.4, 1.75);
     // if (curr >= max * 0.07 && curr <= max * 0.33) {
     //   config.petalRadiusRange = 0.9;
     // } else {

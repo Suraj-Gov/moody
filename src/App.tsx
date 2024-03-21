@@ -14,7 +14,7 @@ function App() {
   return (
     <div className="flex justify-center items-center h-screen">
       <main className="flex flex-col justify-center items-center gap-12">
-        <ReactivePolyflower curr={moodQ} range={range} size={250} />
+        <ReactivePolyflower curr={moodQ} range={range} size={200} />
         <section className="flex flex-col justify-center items-center">
           <label htmlFor="mood-slider">How're ya feelin?</label>
           <div className="mt-4 flex gap-4">
