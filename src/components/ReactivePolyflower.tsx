@@ -1,9 +1,11 @@
 import React, { CSSProperties } from "react";
 import Polyflower from "./Polyflower";
+import { MOOD_RANGE, useMoodContext } from "../contexts/MoodContext";
+import { useDelayedValue } from "../hooks/useDelayedValue";
+import { useCSSVariables } from "../hooks/useCSSVariables";
 
 interface props {
-  range: number;
-  curr: number;
+  morphDelayMs?: number;
   size: number;
   anim: {
     id: string;
@@ -49,8 +51,8 @@ const toRange = (from: number, to: number, currVal: number) => {
   return Math.abs(delta);
 };
 
-const getReactiveConfig = (props: props) => {
-  const { curr, range, size } = props;
+const getReactiveConfig = (params: { currMoodQ: number; size: number }) => {
+  const { currMoodQ: curr, size } = params;
   const config: React.ComponentProps<typeof Polyflower> = {
     elongation: {
       petal: 1,
@@ -66,8 +68,8 @@ const getReactiveConfig = (props: props) => {
     petalRadiusRange: 0.9,
   };
 
-  const min = -range;
-  const max = range;
+  const min = -MOOD_RANGE;
+  const max = MOOD_RANGE;
   const isShitty = curr >= min && curr < min * 0.07;
   if (isShitty) {
     const d = toRange(min, min * 0.07, curr);
@@ -120,14 +122,76 @@ const getReactiveConfig = (props: props) => {
   return config;
 };
 
+const getMoodColors = (params: { currMoodQ: number }) => {
+  // shitty -3, -2, -1, 0, 1, 2, 3 heavenly
+  const { currMoodQ } = params;
+  const sliceLength = MOOD_RANGE / 3;
+  const moodIdx = Math.round(currMoodQ / sliceLength);
+
+  let outerColor: string;
+  let innerColor: string;
+  switch (moodIdx) {
+    case -3: {
+      outerColor = "196, 92, 255";
+      innerColor = "146, 53, 210";
+      break;
+    }
+    case -2: {
+      outerColor = "125, 114, 255";
+      innerColor = "88, 74, 210";
+      break;
+    }
+    case -1: {
+      outerColor = "150, 192, 255";
+      innerColor = "86, 120, 210";
+      break;
+    }
+    case 0: {
+      outerColor = "224, 250, 255";
+      innerColor = "103, 183, 210";
+      break;
+    }
+    case 1: {
+      outerColor = "154, 255, 129";
+      innerColor = "98, 210, 88";
+      break;
+    }
+    case 2: {
+      outerColor = "222, 255, 117";
+      innerColor = "224, 212, 92";
+      break;
+    }
+    case 3: {
+      outerColor = "255, 172, 91";
+      innerColor = "232, 115, 53";
+      break;
+    }
+    default: {
+      outerColor = "224, 250, 255";
+      innerColor = "103, 183, 210";
+    }
+  }
+
+  return {
+    "--fill-outer": `rgb(${outerColor}, var(--opacity-fill-outer))`,
+    "--fill-inner": `rgb(${innerColor}, var(--opacity-fill-inner))`,
+  };
+};
+
 const ReactivePolyflower: React.FC<props> = (props) => {
-  const config = getReactiveConfig(props);
+  const { morphDelayMs = 0, anim, size } = props;
+  const { moodQ } = useMoodContext();
+  const config = useDelayedValue(
+    getReactiveConfig({ currMoodQ: moodQ, size }),
+    morphDelayMs
+  );
+  useCSSVariables(getMoodColors({ currMoodQ: moodQ }));
 
   const animationDelay = `${props.anim.delayMs}ms`;
   const transitionDelay = `${props.anim.delayMs}ms`;
 
   const style = {
-    ...props.anim.style,
+    ...anim.style,
     animationDelay,
     transitionDelay,
   };
@@ -135,13 +199,13 @@ const ReactivePolyflower: React.FC<props> = (props) => {
   return (
     <Polyflower style={style} id={props.anim.id} {...config}>
       <defs>
-        <radialGradient style={style} id="bg">
+        <radialGradient style={style} id="bg-fill">
           <stop offset="0%" stopColor="var(--fill-inner)" />
           <stop offset="100%" stopColor="var(--fill-outer)" />
         </radialGradient>
         <linearGradient
           style={style}
-          id="stroke"
+          id="stroke-fill"
           gradientTransform="rotate(45 0.5 0.5)"
         >
           <stop offset="0%" stopColor="var(--fill-outer)" />

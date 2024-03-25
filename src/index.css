@@ -4,15 +4,24 @@
 
 :root {
   --opacity-fill-outer: 1;
-  --fill-outer: rgb(224, 250, 255, var(--opacity-fill-outer));
   --opacity-fill-inner: 1;
-  --fill-inner: rgb(103, 183, 210, var(--opacity-fill-inner));
   --html-bg: #383e42;
   --html-color: #f2f2f2;
   --anim-duration: 5s;
+  --transition-duration: 0.5s;
 }
 
 html {
   background: var(--html-bg);
   color: var(--html-color);
 }
+
+/* colors
+-1 =
+- outer = rgb(150 192 255)
+- inner = rgb(86 120 210)
+
+1 =
+- outer = rgb(177 255 180)
+- inner = rgb(102 210 110)
+*/
