@@ -1,10 +1,15 @@
-import React, { useRef } from "react";
+import React, { CSSProperties } from "react";
 import Polyflower from "./Polyflower";
 
 interface props {
   range: number;
   curr: number;
   size: number;
+  anim: {
+    id: string;
+    delayMs?: number;
+    style?: CSSProperties;
+  };
 }
 
 type ArrayLeast2<T> = [T, T, ...T[]];
@@ -118,19 +123,33 @@ const getReactiveConfig = (props: props) => {
 const ReactivePolyflower: React.FC<props> = (props) => {
   const config = getReactiveConfig(props);
 
-  const containerRef = useRef<HTMLDivElement>(null);
+  const animationDelay = `${props.anim.delayMs}ms`;
+  const transitionDelay = `${props.anim.delayMs}ms`;
+
+  const style = {
+    ...props.anim.style,
+    animationDelay,
+    transitionDelay,
+  };
 
   return (
-    <div
-      className="relative pointer-events-none touch-none"
-      ref={containerRef}
-      style={{ width: props.size * 2, height: props.size * 2 }}
-    >
-      <Polyflower
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-        {...config}
-      />
-    </div>
+    <Polyflower style={style} id={props.anim.id} {...config}>
+      <defs>
+        <radialGradient style={style} id="bg">
+          <stop offset="0%" stopColor="var(--fill-inner)" />
+          <stop offset="100%" stopColor="var(--fill-outer)" />
+        </radialGradient>
+        <linearGradient
+          style={style}
+          id="stroke"
+          gradientTransform="rotate(45 0.5 0.5)"
+        >
+          <stop offset="0%" stopColor="var(--fill-outer)" />
+          <stop offset="50%" stopColor="var(--fill-inner)" />
+          <stop offset="100%" stopColor="var(--fill-outer)" />
+        </linearGradient>
+      </defs>
+    </Polyflower>
   );
 };
 

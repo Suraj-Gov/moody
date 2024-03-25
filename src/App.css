@@ -1,0 +1,53 @@
+@keyframes bloom-stroke {
+  0% {
+    stroke-width: 12;
+  }
+  100% {
+    stroke-width: 4;
+  }
+}
+
+svg#flower > path {
+  animation: bloom-stroke var(--anim-duration) infinite;
+}
+
+path {
+  stroke-width: 4;
+  stroke: url(#stroke);
+  fill: url(#bg);
+}
+
+stop {
+  transition: all var(--anim-duration) ease;
+}
+
+@keyframes bloom {
+  0% {
+    z-index: 10;
+    opacity: 1;
+    --opacity-fill-outer: 1;
+    --opacity-fill-inner: 1;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  90% {
+    --opacity-fill-outer: 0.2;
+    opacity: 0.7;
+  }
+  100% {
+    z-index: 1;
+    --opacity-fill-outer: 0;
+    --opacity-fill-inner: 0.6;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+svg#flower {
+  opacity: 0;
+  animation: bloom var(--anim-duration) ease infinite;
+}
+
+svg#flower-center {
+  z-index: 100;
+  transform: translate(-50%, -50%);
+}

@@ -1,3 +1,4 @@
+export const MAX_SVG_SIZE = 500;
 export type TCoord = [number, number];
 
 const f = (n: number) => Number(n.toFixed(2));

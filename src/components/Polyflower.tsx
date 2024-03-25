@@ -1,5 +1,6 @@
-import React, { useMemo } from "react";
+import React, { CSSProperties, PropsWithChildren, useMemo } from "react";
 import {
+  MAX_SVG_SIZE,
   Rounder,
   TCoord,
   findIntersectionPoint,
@@ -8,7 +9,7 @@ import {
   xy,
 } from "../utils/math";
 
-interface props {
+interface props extends PropsWithChildren {
   sides: number;
   size: number;
   foldRadiusRange: number /** 0 to 1 */;
@@ -22,6 +23,8 @@ interface props {
   };
   petalRadiusRange: number /** 0 to 1 */;
   className?: React.SVGAttributes<SVGSVGElement>["className"];
+  id?: string;
+  style?: CSSProperties;
 }
 
 const Polyflower: React.FC<props> = ({
@@ -32,6 +35,9 @@ const Polyflower: React.FC<props> = ({
   rounding,
   elongation,
   className,
+  children,
+  id,
+  style,
 }) => {
   const angleDelta = 360 / sides;
   const petalRadius = size * petalRadiusRange;
@@ -39,7 +45,7 @@ const Polyflower: React.FC<props> = ({
   const maxFoldRadius = Math.cos(toRad(angleDelta / 2)) * petalRadius;
   const foldRadius = foldRadiusRange * maxFoldRadius;
 
-  const origin: TCoord = [size, size];
+  const origin: TCoord = [MAX_SVG_SIZE / 2, MAX_SVG_SIZE / 2];
 
   // always point upwards
   let rotationOffset = 0;
@@ -142,17 +148,18 @@ const Polyflower: React.FC<props> = ({
 
   return (
     <svg
-      className={className}
-      width={size * 2}
-      height={size * 2}
+      style={style}
+      className={`origin-center absolute top-0 left-0 ${className}`}
+      id={id}
+      width={MAX_SVG_SIZE}
+      height={MAX_SVG_SIZE}
       fill="transparent"
     >
       <path
+        style={{ animationDelay: style?.animationDelay }}
         d={`M ${finalPath.join("L")} Z`}
-        strokeWidth={2}
-        stroke="black"
-        fill="red"
       />
+      {children}
     </svg>
   );
 };
