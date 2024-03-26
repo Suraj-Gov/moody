@@ -1,4 +1,9 @@
-import React, { CSSProperties, PropsWithChildren, useMemo } from "react";
+import React, {
+  CSSProperties,
+  PropsWithChildren,
+  forwardRef,
+  useMemo,
+} from "react";
 import {
   MAX_SVG_SIZE,
   Rounder,
@@ -27,18 +32,21 @@ interface props extends PropsWithChildren {
   style?: CSSProperties;
 }
 
-const Polyflower: React.FC<props> = ({
-  petalRadiusRange,
-  sides,
-  size,
-  foldRadiusRange,
-  rounding,
-  elongation,
-  className,
-  children,
-  id,
-  style,
-}) => {
+const Polyflower = forwardRef<SVGSVGElement, props>(function Polyflower(
+  {
+    petalRadiusRange,
+    sides,
+    size,
+    foldRadiusRange,
+    rounding,
+    elongation,
+    className,
+    children,
+    id,
+    style,
+  },
+  ref
+) {
   const angleDelta = 360 / sides;
   const petalRadius = size * petalRadiusRange;
 
@@ -148,6 +156,7 @@ const Polyflower: React.FC<props> = ({
 
   return (
     <svg
+      ref={ref}
       style={style}
       className={`origin-center absolute top-0 left-0 ${className}`}
       id={id}
@@ -162,6 +171,6 @@ const Polyflower: React.FC<props> = ({
       {children}
     </svg>
   );
-};
+});
 
 export default Polyflower;

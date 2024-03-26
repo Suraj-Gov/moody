@@ -2,9 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+@property --opacity-fill-outer {
+  syntax: "<number>";
+  initial-value: 1;
+  inherits: false;
+}
+
+@property --opacity-fill-inner {
+  syntax: "<number>";
+  initial-value: 1;
+  inherits: false;
+}
+
 :root {
-  --opacity-fill-outer: 1;
-  --opacity-fill-inner: 1;
   --html-bg: #383e42;
   --html-color: #f2f2f2;
   --anim-duration: 5s;

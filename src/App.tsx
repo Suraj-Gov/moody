@@ -30,7 +30,7 @@ function App() {
               <ReactivePolyflower
                 size={BLOOMING_FLOWER_SIZE}
                 anim={{
-                  id: "flower",
+                  id: "1",
                 }}
               />
             </Slot>
@@ -39,7 +39,7 @@ function App() {
                 size={BLOOMING_FLOWER_SIZE}
                 morphDelayMs={50}
                 anim={{
-                  id: "flower",
+                  id: "2",
                   delayMs: 1250,
                 }}
               />
@@ -49,7 +49,7 @@ function App() {
                 size={BLOOMING_FLOWER_SIZE}
                 morphDelayMs={120}
                 anim={{
-                  id: "flower",
+                  id: "3",
                   delayMs: 2500,
                 }}
               />
@@ -59,7 +59,7 @@ function App() {
                 size={BLOOMING_FLOWER_SIZE}
                 morphDelayMs={200}
                 anim={{
-                  id: "flower",
+                  id: "4",
                   delayMs: 3750,
                 }}
               />
@@ -68,10 +68,8 @@ function App() {
               <ReactivePolyflower
                 size={CENTER_FLOWER_SIZE}
                 anim={{
-                  id: "flower-center",
-                  style: {
-                    zIndex: 20,
-                  },
+                  id: "center",
+                  shouldBloom: false,
                 }}
               />
             </Slot>
