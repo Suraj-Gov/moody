@@ -154,21 +154,30 @@ const Polyflower = forwardRef<SVGSVGElement, props>(function Polyflower(
     console.error("this should never get logged");
   });
 
+  const path = (
+    <path
+      style={{ animationDelay: style?.animationDelay }}
+      d={`M ${finalPath.join("L")} Z`}
+    />
+  );
+
   return (
     <svg
       ref={ref}
       style={style}
-      className={`origin-center absolute top-0 left-0 ${className}`}
+      className={`flower origin-center absolute top-0 left-0 ${className}`}
       id={id}
       width={MAX_SVG_SIZE}
       height={MAX_SVG_SIZE}
       fill="transparent"
     >
-      <path
-        style={{ animationDelay: style?.animationDelay }}
-        d={`M ${finalPath.join("L")} Z`}
-      />
       {children}
+      <mask fill="#ffffff" id={`mask-bg-${id}`}>
+        {path}
+      </mask>
+      <mask stroke="#ffffff" id={`mask-stroke-${id}`}>
+        {path}
+      </mask>
     </svg>
   );
 });

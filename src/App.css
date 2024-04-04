@@ -1,18 +1,17 @@
 path {
-  stroke-width: 4;
-  stroke: url(#stroke-fill);
-  fill: url(#bg-fill);
+  stroke-width: 3;
+  stroke: #ffffff;
 }
 
 stop {
   transition: all var(--transition-duration) ease;
 }
 
-svg {
+.flower {
   opacity: 0;
 }
 
-svg#center {
+.flower#center {
   opacity: 1;
   transform: translate(-50%, -50%);
   z-index: 20;

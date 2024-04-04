@@ -3,6 +3,59 @@ import Polyflower from "./Polyflower";
 import { MOOD_RANGE, useMoodContext } from "../contexts/MoodContext";
 import { useDelayedValue } from "../hooks/useDelayedValue";
 import { useCSSVariables } from "../hooks/useCSSVariables";
+import { MAX_SVG_SIZE } from "../utils/math";
+
+const S0 = {
+  fill: "#C4C4C4",
+  stroke: "#d4d4d4",
+};
+const S1 = {
+  fill: "#E4E4E4",
+  stroke: "#f0f0f0",
+};
+const S2 = {
+  fill: "#9B9B9B",
+  stroke: "#6f6f6f",
+};
+const S_DEGREE_DELTA = 3.6;
+
+const GRADIENT_STOPS = {
+  SHITTY: [
+    [S2, S0],
+    [S2, S0],
+    [S1, S0],
+    [S2, S1],
+    [S1, S2],
+    [S0, S1],
+    [S1, S2],
+    [S0, S2],
+    [S0, S2],
+    [S2, S0],
+    [S2, S1],
+    [S1, S0],
+    [S2, S1],
+    [S1, S2],
+    [S0, S1],
+    [S0, S2],
+  ],
+};
+
+const GRADIENT_CSS_STOPS = {
+  SHITTY: {
+    FILL: GRADIENT_STOPS.SHITTY.map(([c1, c2], idx, arr) => {
+      const d = (idx / arr.length) * 360;
+      const stop1 = `${c1.fill} ${d}deg`;
+      const stop2 = `${c2.fill} ${d + S_DEGREE_DELTA}deg`;
+      return [stop1, stop2].join(", ");
+    }).join(", "),
+    STROKE: GRADIENT_STOPS.SHITTY.map(([c1, c2], idx, arr) => {
+      const d = (idx / arr.length) * 360;
+      const stop1 = `${c1.stroke} ${d}deg`;
+      const stop2 = `${c2.stroke} ${d + S_DEGREE_DELTA}deg`;
+      return [stop1, stop2].join(", ");
+    }).join(", "),
+  },
+};
 
 interface props {
   morphDelayMs?: number;
@@ -177,8 +230,8 @@ const getMoodCSSVariables = (currMoodQ: number, args: props["anim"]) => {
       }
 
       return {
-        "--fill-outer": `rgb(${outerColor}, var(--opacity-fill-outer))`,
-        "--fill-inner": `rgb(${innerColor}, var(--opacity-fill-inner))`,
+        "--fill-outer": `rgba(${outerColor}, var(--opacity-base-fill))`,
+        "--fill-inner": `rgba(${innerColor}, var(--opacity-fill-inner))`,
       };
     },
     rotation: () => {
@@ -201,10 +254,10 @@ const getMoodCSSVariables = (currMoodQ: number, args: props["anim"]) => {
 
 const strokeKeyframes: CSSProperties[] = [
   {
-    strokeWidth: 12,
+    strokeWidth: 9,
   },
   {
-    strokeWidth: 4,
+    strokeWidth: 3,
   },
 ];
 
@@ -224,13 +277,13 @@ const animateSvgBloom = (ref: SVGSVGElement, args: props["anim"]) => {
       offset: 0,
       zIndex: 10,
       opacity: 1,
-      "--opacity-fill-outer": 1,
+      "--opacity-base-fill": 1,
       "--opacity-fill-inner": 1,
       transform: `translate(-50%, -50%) scale(0.2) rotate(0deg)`,
     },
     {
       offset: 0.5,
-      "--opacity-fill-outer": 0.2,
+      "--opacity-base-fill": 0.2,
       transform: `translate(-50%, -50%) scale(0.6) rotate(calc(var(${rotationCssVarKey}) / 2))`,
     },
     {
@@ -241,7 +294,7 @@ const animateSvgBloom = (ref: SVGSVGElement, args: props["anim"]) => {
     {
       offset: 1,
       zIndex: 1,
-      "--opacity-fill-outer": 0,
+      "--opacity-base-fill": 0,
       opacity: 0,
       transform: `translate(-50%, -50%) scale(1) rotate(var(${rotationCssVarKey}))`,
     },
@@ -278,12 +331,6 @@ const ReactivePolyflower: React.FC<props> = (props) => {
 
   useCSSVariables(
     {
-      val: getMoodCSSVariables(moodQ, anim).colors(),
-    },
-    [moodQ]
-  );
-  useCSSVariables(
-    {
       val: getMoodCSSVariables(moodQ, anim).rotation(),
       nodes: [svgRef.current],
     },
@@ -303,23 +350,58 @@ const ReactivePolyflower: React.FC<props> = (props) => {
     transitionDelay,
   };
 
+  const bgMaskId = `url(#mask-bg-${props.anim.id})`;
+  const strokeMaskId = `url(#mask-stroke-${props.anim.id})`;
+
   return (
     <Polyflower ref={svgRef} style={style} id={props.anim.id} {...config}>
-      <defs>
-        <radialGradient style={style} id="bg-fill">
-          <stop offset="0%" stopColor="var(--fill-inner)" />
-          <stop offset="100%" stopColor="var(--fill-outer)" />
-        </radialGradient>
-        <linearGradient
-          style={style}
-          id="stroke-fill"
-          gradientTransform="rotate(45 0.5 0.5)"
-        >
-          <stop offset="0%" stopColor="var(--fill-outer)" />
-          <stop offset="50%" stopColor="var(--fill-inner)" />
-          <stop offset="100%" stopColor="var(--fill-outer)" />
-        </linearGradient>
-      </defs>
+      <foreignObject
+        mask={bgMaskId}
+        x="0%"
+        y="0%"
+        width={MAX_SVG_SIZE}
+        height={MAX_SVG_SIZE}
+      >
+        <div className="absolute inset-0">
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `#BA84E9`,
+            }}
+          ></div>
+          <div
+            className="absolute inset-0"
+            style={{
+              mixBlendMode: "color-burn",
+              background: `conic-gradient(from 180deg, ${GRADIENT_CSS_STOPS.SHITTY.FILL})`,
+            }}
+          ></div>
+        </div>
+      </foreignObject>
+
+      <foreignObject
+        mask={strokeMaskId}
+        x="0%"
+        y="0%"
+        width={MAX_SVG_SIZE}
+        height={MAX_SVG_SIZE}
+      >
+        <div className="absolute inset-0">
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `#b57fe6`,
+            }}
+          ></div>
+          <div
+            className="absolute inset-0"
+            style={{
+              mixBlendMode: "color-burn",
+              background: `conic-gradient(from 45deg, ${GRADIENT_CSS_STOPS.SHITTY.STROKE})`,
+            }}
+          ></div>
+        </div>
+      </foreignObject>
     </Polyflower>
   );
 };
